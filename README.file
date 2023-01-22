@@ -10,4 +10,124 @@ my following goals are to:
   1. Understand the growth of each of roles, in terms of annual hiring trends
   2. Income distribution across the spectrum of the roles  depending on level of experience
   3. Be able to support others in learning about the latest market trends based on labor data
-  4. 
+
+Cleaning the dataset
+The original dataset had over 700+ occupational titles, for the analysis I was only interested in the roles with the word "analyst" in the title or roles in the data/techology industry. 
+The method of cleaning the dataset was performing a search for all the roles with the titles I was interested in and removing the remaining titles that was 
+not necessary for the project. The final spreadsheet was exported as a CSV file and imported into BigQuery for SQL analysis. 
+
+Below are the SQL queries I used for my analysis. 
+
+Show entire dataset
+
+SELECT 
+	*
+FROM 
+	`nysdol-occupational-titles.NYCDOL_Occupational_Projection.Employment_Projections`
+
+Count the number of rows in the dataset 
+
+SELECT 
+	count(*)
+FROM 
+	`nysdol-occupational-titles.NYCDOL_Occupational_Projection.Employment_Projections`
+
+
+Find out if there are any columns in _Industry that are not null
+
+SELECT 
+	_Industry
+FROM 
+	`nysdol-occupational-titles.NYCDOL_Occupational_Projection.Employment_Projections`
+WHERE 
+	_Industry IS NOT NULL
+
+
+Show all of the titles in the dataset
+
+SELECT 
+	title
+FROM 
+	`nysdol-occupational-titles.NYCDOL_Occupational_Projection.Employment_Projections`
+WHERE 
+	title != 'Work experience in a related occupation'
+
+
+Count the number of occupations in the dataset
+
+SELECT 
+	count(title) as occupation_title
+FROM 
+	`nysdol-occupational-titles.NYCDOL_Occupational_Projection.Employment_Projections`
+WHERE 
+	title != 'Work experience in a related occupation'
+
+What are the distinct industries in the dataset?
+
+SELECT 
+	distinct (_industry) as industry_
+FROM 
+	`nysdol-occupational-titles.NYCDOL_Occupational_Projection.Employment_Projections`
+WHERE 
+	title != 'Work experience in a related occupation'
+
+Count the total number of job titles in an industry
+
+SELECT
+	 _industry, count(_2020) as num_titles
+FROM `
+	nysdol-occupational-titles.NYCDOL_Occupational_Projection.Employment_Projections`
+WHERE 
+	title != 'Work experience in a related occupation'
+GROUP BY 
+	 _industry
+ORDER BY
+	count(_2020) desc
+
+
+Show the total average annual openings by each industry 
+
+SELECT 
+	_industry, 
+	round(avg(Total___Annual_Average_Openings),2) as annual_openings
+FROM 
+	`nysdol-occupational-titles.NYCDOL_Occupational_Projection.Employment_Projections`
+WHERE 
+	title != 'Work experience in a related occupation'
+GROUP BY
+	_industry
+ORDER BY
+	avg(Total___Annual_Average_Openings) desc
+
+
+Show the average total openings for job title
+
+SELECT 
+	title, 
+	round(avg(Total___Annual_Average_Openings),2) as annual_openings
+FROM 
+	`nysdol-occupational-titles.NYCDOL_Occupational_Projection.Employment_Projections`
+WHERE 
+	title != 'Work experience in a related occupation'
+group by 
+	title
+order by 
+	avg(Total___Annual_Average_Openings) desc
+
+
+Show the salary ranges for each level (entry, average, median, and experienced) for each job title
+
+SELECT  
+        title, 
+        Entry___Annual_Wages_______2022 as entry_salary, 
+        Mean___Annual_Wages_______2022 as mean_salary, 
+        Median___Annual_Wages_______2022 as median_salary,
+        Experienced___Annual_Wages_______2022 as experienced_salary
+FROM
+        `nysdol-occupational-titles.NYCDOL_Occupational_Projection.Employment_Projections`
+WHERE 
+        title != 'Work experience in a related occupation'
+order by 
+         title desc
+
+
